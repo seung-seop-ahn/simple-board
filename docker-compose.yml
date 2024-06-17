@@ -1,0 +1,20 @@
+name: board
+
+services:
+  mysql:
+    image: mysql:5.7
+    platform: linux/amd64
+    container_name: mysql-5.7-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: board
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data:/var/lib/mysql
+
+volumes:
+  mysql-data:
