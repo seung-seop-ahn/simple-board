@@ -5,7 +5,7 @@ services:
     image: mysql:5.7
     platform: linux/amd64
     container_name: mysql-5.7-container
-    restart: always
+    restart: no
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: board
