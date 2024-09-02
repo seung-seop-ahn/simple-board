@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -17,7 +19,13 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("")
+    @GetMapping("")
+    public ResponseEntity<List<User>> getUserList() {
+        List<User> list = userService.getUserList();
+        return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("sign-up")
     public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserDto dto) {
         User user = userService.createUser(dto);
         return ResponseEntity.ok(user);

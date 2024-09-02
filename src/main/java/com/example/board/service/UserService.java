@@ -6,6 +6,8 @@ import com.example.board.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class UserService {
     private final UserRepository userRepository;
@@ -13,6 +15,10 @@ public class UserService {
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public List<User> getUserList() {
+        return this.userRepository.findAll();
     }
 
     public User createUser(CreateUserDto dto) {
@@ -26,4 +32,5 @@ public class UserService {
     public void deleteUser(Long userId) {
         this.userRepository.deleteById(userId);
     }
+
 }
