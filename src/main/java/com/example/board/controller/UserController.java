@@ -17,9 +17,15 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserDto dto) {
         User user = userService.createUser(dto);
         return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        this.userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
 }
