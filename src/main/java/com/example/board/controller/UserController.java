@@ -1,7 +1,7 @@
 package com.example.board.controller;
 
 import com.example.board.entity.User;
-import com.example.board.service.CustomUserDetailsService;
+import com.example.board.config.security.CustomUserDetailsService;
 import com.example.board.service.UserService;
 import com.example.board.util.JwtUtil;
 import jakarta.validation.Valid;
@@ -40,13 +40,13 @@ public class UserController {
     }
 
     @PostMapping("sign-up")
-    public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserDto dto) {
-        User user = userService.createUser(dto);
+    public ResponseEntity<User> signUp(@Valid @RequestBody SignUpDto dto) {
+        User user = userService.signUp(dto);
         return ResponseEntity.ok(user);
     }
 
     @PostMapping("sign-in")
-    public ResponseEntity<String> login(@Valid @RequestBody SignInDto dto) throws AuthenticationException {
+    public ResponseEntity<String> signIn(@Valid @RequestBody SignInDto dto) throws AuthenticationException {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(dto.getUsername());
         return ResponseEntity.ok(jwtUtil.generateToken(userDetails.getUsername()));

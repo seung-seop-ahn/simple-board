@@ -1,6 +1,6 @@
 package com.example.board.service;
 
-import com.example.board.controller.CreateUserDto;
+import com.example.board.controller.SignUpDto;
 import com.example.board.entity.User;
 import com.example.board.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    public User createUser(CreateUserDto dto) {
+    public User signUp(SignUpDto dto) {
         String encodedPassword = this.passwordEncoder.encode(dto.getPassword());
 
         User user = new User();
