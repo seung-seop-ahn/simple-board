@@ -52,6 +52,12 @@ public class UserController {
         return ResponseEntity.ok(jwtUtil.generateToken(userDetails.getUsername()));
     }
 
+    @PostMapping("validate/token")
+    public ResponseEntity<String> validateToken(@RequestBody() ValidateTokenDto dto) {
+        Boolean valid = jwtUtil.validateToken(dto.getToken());
+        return valid ? ResponseEntity.ok("ok") : ResponseEntity.notFound().build();
+    }
+
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         this.userService.deleteUser(userId);

@@ -40,7 +40,19 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, String username) {
+    public Boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(this.secret)
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Boolean isUserToken(String token, String username) {
         final String usernameFromToken = getUsernameFromToken(token);
         return (usernameFromToken.equals(username) && !isTokenExpired(token));
     }
