@@ -1,10 +1,17 @@
 package com.example.board.controller;
 
 import com.example.board.entity.User;
+import com.example.board.service.CustomUserDetailsService;
 import com.example.board.service.UserService;
+import com.example.board.util.JwtUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,10 +19,17 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtUtil jwtUtil;
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(AuthenticationManager authenticationManager, CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil, UserService userService) {
+        this.authenticationManager = authenticationManager;
+        this.customUserDetailsService = customUserDetailsService;
+        this.jwtUtil = jwtUtil;
         this.userService = userService;
     }
 
@@ -29,6 +43,13 @@ public class UserController {
     public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserDto dto) {
         User user = userService.createUser(dto);
         return ResponseEntity.ok(user);
+    }
+
+    @PostMapping("sign-in")
+    public ResponseEntity<String> login(@Valid @RequestBody SignInDto dto) throws AuthenticationException {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(dto.getUsername());
+        return ResponseEntity.ok(jwtUtil.generateToken(userDetails.getUsername()));
     }
 
     @DeleteMapping("/{userId}")
