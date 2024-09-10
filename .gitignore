@@ -37,3 +37,6 @@ out/
 
 ### MySQL Data ###
 data
+
+### Application Properties ###
+/src/main/resources/application.properties
