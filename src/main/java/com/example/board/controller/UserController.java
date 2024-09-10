@@ -1,7 +1,8 @@
 package com.example.board.controller;
 
-import com.example.board.entity.User;
 import com.example.board.config.security.CustomUserDetailsService;
+import com.example.board.entity.User;
+import com.example.board.service.TokenBlacklistService;
 import com.example.board.service.UserService;
 import com.example.board.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
@@ -16,6 +17,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -26,13 +30,15 @@ public class UserController {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Autowired
-    public UserController(AuthenticationManager authenticationManager, CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil, UserService userService) {
+    public UserController(AuthenticationManager authenticationManager, CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil, UserService userService, TokenBlacklistService tokenBlacklistService) {
         this.authenticationManager = authenticationManager;
         this.customUserDetailsService = customUserDetailsService;
         this.jwtUtil = jwtUtil;
         this.userService = userService;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @GetMapping("")
@@ -66,7 +72,16 @@ public class UserController {
     }
 
     @PostMapping("sign-out")
-    public ResponseEntity<String> signOut(HttpServletResponse response) {
+    public ResponseEntity<String> signOut(
+            @RequestBody(required = false) ValidateTokenDto requestTokenDto,
+            @CookieValue("token") String cookieToken,
+            HttpServletResponse response
+    ) {
+        String token = cookieToken != null ? cookieToken : requestTokenDto.getToken();
+        LocalDateTime expireDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+        String username = jwtUtil.getUsernameFromToken(token);
+        this.tokenBlacklistService.addBlacklist(token, expireDate, username);
+
         Cookie cookie = new Cookie("token", null);
 //        cookie.setHttpOnly(true);
         cookie.setSecure(true);
@@ -79,7 +94,7 @@ public class UserController {
     }
 
     @PostMapping("validate/token")
-    public ResponseEntity<String> validateToken(@RequestBody() ValidateTokenDto dto) {
+    public ResponseEntity<String> validateToken(@Valid @RequestBody() ValidateTokenDto dto) {
         Boolean valid = jwtUtil.validateToken(dto.getToken());
         return valid ? ResponseEntity.ok("ok") : ResponseEntity.notFound().build();
     }
