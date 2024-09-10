@@ -4,6 +4,8 @@ import com.example.board.entity.User;
 import com.example.board.config.security.CustomUserDetailsService;
 import com.example.board.service.UserService;
 import com.example.board.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,10 +48,21 @@ public class UserController {
     }
 
     @PostMapping("sign-in")
-    public ResponseEntity<String> signIn(@Valid @RequestBody SignInDto dto) throws AuthenticationException {
+    public ResponseEntity<String> signIn(@Valid @RequestBody SignInDto dto, HttpServletResponse response) throws AuthenticationException {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword()));
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(dto.getUsername());
-        return ResponseEntity.ok(jwtUtil.generateToken(userDetails.getUsername()));
+
+        String token = jwtUtil.generateToken(userDetails.getUsername());
+
+        Cookie cookie = new Cookie("token", token);
+//        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60); // 1 hour
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("validate/token")
