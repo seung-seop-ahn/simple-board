@@ -65,6 +65,19 @@ public class UserController {
         return ResponseEntity.ok(token);
     }
 
+    @PostMapping("sign-out")
+    public ResponseEntity<String> signOut(HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);
+//        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
+
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("validate/token")
     public ResponseEntity<String> validateToken(@RequestBody() ValidateTokenDto dto) {
         Boolean valid = jwtUtil.validateToken(dto.getToken());
