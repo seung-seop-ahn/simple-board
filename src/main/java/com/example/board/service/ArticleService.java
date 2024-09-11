@@ -1,6 +1,6 @@
 package com.example.board.service;
 
-import com.example.board.controller.PostArticleDto;
+import com.example.board.dto.PostArticleDto;
 import com.example.board.entity.Article;
 import com.example.board.entity.Board;
 import com.example.board.entity.User;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ArticleService {

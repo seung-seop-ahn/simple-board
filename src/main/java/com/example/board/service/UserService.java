@@ -1,6 +1,6 @@
 package com.example.board.service;
 
-import com.example.board.controller.SignUpDto;
+import com.example.board.dto.SignUpDto;
 import com.example.board.entity.User;
 import com.example.board.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

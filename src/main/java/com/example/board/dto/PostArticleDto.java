@@ -1,4 +1,4 @@
-package com.example.board.controller;
+package com.example.board.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
