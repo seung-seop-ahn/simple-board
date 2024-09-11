@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ArticleService {
@@ -32,7 +33,7 @@ public class ArticleService {
 
     public Article postArticle(String username, Long boardId, PostArticleDto dto) throws BadRequestException {
         Boolean isAvailable = this.isUserArticlePostingAvailable(username);
-        if(!isAvailable) {
+        if (!isAvailable) {
             throw new BadRequestException("User posting rate limit exceeded.");
         }
 
@@ -65,7 +66,7 @@ public class ArticleService {
 
     public Article putArticle(String username, Long boardId, Long articleId, PutArticleDto dto) throws BadRequestException {
         Boolean isAvailable = this.isUserArticleEditingAvailable(username);
-        if(!isAvailable) {
+        if (!isAvailable) {
             throw new BadRequestException("User editing rate limit exceeded.");
         }
 
@@ -78,14 +79,42 @@ public class ArticleService {
         Article article = this.articleRepository.findById(articleId)
                 .orElseThrow(() -> new BadRequestException("Article not found"));
 
-        if(dto.getTitle() != null) {
+        if (dto.getTitle() != null) {
             article.setTitle(dto.getTitle());
         }
-        if(dto.getContents() != null) {
+        if (dto.getContents() != null) {
             article.setContents(dto.getContents());
         }
 
         return this.articleRepository.save(article);
+    }
+
+    public void deleteArticle(String username, Long boardId, Long articleId) throws BadRequestException {
+        Boolean isAvailable = this.isUserArticleEditingAvailable(username);
+        if (!isAvailable) {
+            throw new BadRequestException("User editing rate limit exceeded.");
+        }
+
+        User author = this.userRepository.findByUsername(username)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        this.boardRepository.findById(boardId)
+                .orElseThrow(() -> new BadRequestException("Board not found"));
+
+        Article article = this.articleRepository.findById(articleId)
+                .orElseThrow(() -> new BadRequestException("Article not found"));
+
+        if(!Objects.equals(author.getId(), article.getAuthor().getId())) {
+            throw new BadRequestException("User is not article author.");
+        }
+
+        // Hard Deletion
+//        this.articleRepository.delete(article);
+
+        // Soft Deletion
+        article.setIsDeleted(true);
+
+        this.articleRepository.save(article);
     }
 
     private Boolean isUserArticlePostingAvailable(String username) {

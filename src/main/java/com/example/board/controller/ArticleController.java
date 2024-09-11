@@ -55,7 +55,6 @@ public class ArticleController {
         return ResponseEntity.ok(list);
     }
 
-
     @PutMapping("/{boardId}/articles/{articleId}")
     public ResponseEntity<Article> putArticle(
             @PathVariable Long boardId,
@@ -66,5 +65,17 @@ public class ArticleController {
 
         Article article = this.articleService.putArticle(userDetails.getUsername(), boardId, articleId, dto);
         return ResponseEntity.ok(article);
+    }
+
+    @DeleteMapping("/{boardId}/articles/{articleId}")
+    public ResponseEntity<Void> putArticle(
+            @PathVariable Long boardId,
+            @PathVariable Long articleId
+    ) throws BadRequestException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        this.articleService.deleteArticle(userDetails.getUsername(), boardId, articleId);
+        return ResponseEntity.noContent().build();
     }
 }
