@@ -44,6 +44,14 @@ public class ArticleService {
         return articleRepository.save(article);
     }
 
+    public List<Article> getTop10ArticleListByFirstId(Long boardId, Long firstId) {
+        return articleRepository.findTop10ByBoardIdAndArticleIdGreaterThanOrderByCreatedDateDesc(boardId, firstId);
+    }
+
+    public List<Article> getTop10ArticleListByLastId(Long boardId, Long lastId) {
+        return articleRepository.findTop10ByBoardIdAndArticleIdLessThanOrderByCreatedDateDesc(boardId, lastId);
+    }
+
     public List<Article> getTop10ArticleList(Long boardId) {
         return articleRepository.findTop10ByBoardIdOrderByCreatedDateDesc(boardId);
     }

@@ -35,7 +35,20 @@ public class ArticleController {
     }
 
     @GetMapping("/{boardId}/articles")
-    public ResponseEntity<List<Article>> getTop10ArticleList(@PathVariable Long boardId) {
+    public ResponseEntity<List<Article>> getTop10ArticleList(
+            @PathVariable Long boardId,
+            @RequestParam(required = false) Long firstId,
+            @RequestParam(required = false) Long lastId
+    ) {
+        if (firstId != null) {
+            List<Article> list = this.articleService.getTop10ArticleListByFirstId(boardId, firstId);
+            return ResponseEntity.ok(list);
+        }
+        if (lastId != null) {
+            List<Article> list = this.articleService.getTop10ArticleListByLastId(boardId, lastId);
+            return ResponseEntity.ok(list);
+        }
+
         List<Article> list = this.articleService.getTop10ArticleList(boardId);
         return ResponseEntity.ok(list);
     }
