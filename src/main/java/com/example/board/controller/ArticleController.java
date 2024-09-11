@@ -1,5 +1,7 @@
 package com.example.board.controller;
 
+import com.example.board.dto.PostArticleDto;
+import com.example.board.dto.PutArticleDto;
 import com.example.board.entity.Article;
 import com.example.board.service.ArticleService;
 import jakarta.validation.Valid;
@@ -51,5 +53,18 @@ public class ArticleController {
 
         List<Article> list = this.articleService.getTop10ArticleList(boardId);
         return ResponseEntity.ok(list);
+    }
+
+
+    @PutMapping("/{boardId}/articles/{articleId}")
+    public ResponseEntity<Article> putArticle(
+            @PathVariable Long boardId,
+            @PathVariable Long articleId,
+            @Valid @RequestBody PutArticleDto dto) throws BadRequestException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        Article article = this.articleService.putArticle(userDetails.getUsername(), boardId, articleId, dto);
+        return ResponseEntity.ok(article);
     }
 }

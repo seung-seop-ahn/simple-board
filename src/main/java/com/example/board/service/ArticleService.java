@@ -1,6 +1,7 @@
 package com.example.board.service;
 
 import com.example.board.dto.PostArticleDto;
+import com.example.board.dto.PutArticleDto;
 import com.example.board.entity.Article;
 import com.example.board.entity.Board;
 import com.example.board.entity.User;
@@ -53,5 +54,25 @@ public class ArticleService {
 
     public List<Article> getTop10ArticleList(Long boardId) {
         return articleRepository.findTop10ByBoardIdOrderByCreatedDateDesc(boardId);
+    }
+
+    public Article putArticle(String username, Long boardId, Long articleId, PutArticleDto dto) throws BadRequestException {
+        this.userRepository.findByUsername(username)
+                .orElseThrow(() -> new BadRequestException("User not found."));
+
+        this.boardRepository.findById(boardId)
+                .orElseThrow(() -> new BadRequestException("Board not found"));
+
+        Article article = this.articleRepository.findById(articleId)
+                .orElseThrow(() -> new BadRequestException("Article not found"));
+
+        if(dto.getTitle() != null) {
+            article.setTitle(dto.getTitle());
+        }
+        if(dto.getContents() != null) {
+            article.setContents(dto.getContents());
+        }
+
+        return this.articleRepository.save(article);
     }
 }
