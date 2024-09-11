@@ -12,6 +12,8 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,6 +31,11 @@ public class ArticleService {
     }
 
     public Article postArticle(String username, Long boardId, PostArticleDto dto) throws BadRequestException {
+        Boolean isAvailable = this.isUserArticlePostingAvailable(username);
+        if(!isAvailable) {
+            throw new BadRequestException("User posting rate limit exceeded.");
+        }
+
         User author = this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
@@ -57,6 +64,11 @@ public class ArticleService {
     }
 
     public Article putArticle(String username, Long boardId, Long articleId, PutArticleDto dto) throws BadRequestException {
+        Boolean isAvailable = this.isUserArticleEditingAvailable(username);
+        if(!isAvailable) {
+            throw new BadRequestException("User editing rate limit exceeded.");
+        }
+
         this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
@@ -74,5 +86,23 @@ public class ArticleService {
         }
 
         return this.articleRepository.save(article);
+    }
+
+    private Boolean isUserArticlePostingAvailable(String username) {
+        Article article = this.articleRepository.findLatestArticleByAuthorUsernameOrderByCreatedDateDesc(username);
+        LocalDateTime articleCreatedDate = article.getCreatedDate();
+
+        Duration duration = Duration.between(articleCreatedDate, LocalDateTime.now());
+
+        return duration.toMinutes() >= 1;
+    }
+
+    private Boolean isUserArticleEditingAvailable(String username) {
+        Article article = this.articleRepository.findLatestEditedArticleByAuthorUsernameOrderByUpdatedDateDesc(username);
+        LocalDateTime articleCreatedDate = article.getUpdatedDate();
+
+        Duration duration = Duration.between(articleCreatedDate, LocalDateTime.now());
+
+        return duration.toMinutes() >= 1;
     }
 }
