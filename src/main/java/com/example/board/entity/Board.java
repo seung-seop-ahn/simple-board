@@ -1,6 +1,5 @@
 package com.example.board.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,24 +13,17 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class User {
+public class Board {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String username;
-
-    @JsonIgnore
-    @Column(nullable = false)
-    private String password;
+    private String title;
 
     @Column(nullable = false)
-    private String email;
-
-    @Column()
-    private LocalDateTime lastLogin;
+    private String description;
 
     @CreatedDate
     @Column(insertable = true)

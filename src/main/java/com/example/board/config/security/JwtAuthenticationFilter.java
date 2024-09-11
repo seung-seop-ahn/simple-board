@@ -54,14 +54,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return bearerToken.substring(7);
         }
 
-        if (bearerToken == null) {
-            Cookie[] cookies = request.getCookies();
-            for(Cookie cookie : cookies) {
-                if("token".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
+//        if (bearerToken == null) {
+//            Cookie[] cookies = request.getCookies();
+//            for(Cookie cookie : cookies) {
+//                if("token".equals(cookie.getName())) {
+//                    return cookie.getValue();
+//                }
+//            }
+//        }
 
         return null;
     }
