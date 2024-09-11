@@ -11,6 +11,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,5 +42,9 @@ public class ArticleService {
         article.setContents(dto.getContents());
 
         return articleRepository.save(article);
+    }
+
+    public List<Article> getTop10ArticleList(Long boardId) {
+        return articleRepository.findTop10ByBoardIdOrderByCreatedDateDesc(boardId);
     }
 }

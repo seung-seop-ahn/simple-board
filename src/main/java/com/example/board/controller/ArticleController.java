@@ -1,28 +1,26 @@
 package com.example.board.controller;
 
 import com.example.board.entity.Article;
-import com.example.board.entity.User;
 import com.example.board.service.ArticleService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/boards")
 public class ArticleController {
 
-    private final AuthenticationManager authenticationManager;
     private final ArticleService articleService;
 
     @Autowired
-    public ArticleController(AuthenticationManager authenticationManager, ArticleService articleService) {
-        this.authenticationManager = authenticationManager;
+    public ArticleController(ArticleService articleService) {
         this.articleService = articleService;
     }
 
@@ -34,5 +32,11 @@ public class ArticleController {
 
         Article article = this.articleService.writeArticle(userDetails.getUsername(), boardId, dto);
         return ResponseEntity.ok(article);
+    }
+
+    @GetMapping("/{boardId}/articles")
+    public ResponseEntity<List<Article>> getTop10ArticleList(@PathVariable Long boardId) {
+        List<Article> list = this.articleService.getTop10ArticleList(boardId);
+        return ResponseEntity.ok(list);
     }
 }
