@@ -27,12 +27,12 @@ public class ArticleController {
     }
 
     @PostMapping("/{boardId}/articles")
-    public ResponseEntity<Article> writeArticle(@PathVariable Long boardId, @Valid @RequestBody PostArticleDto dto) throws BadRequestException {
+    public ResponseEntity<Article> postArticle(@PathVariable Long boardId, @Valid @RequestBody PostArticleDto dto) throws BadRequestException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        Article article = this.articleService.writeArticle(userDetails.getUsername(), boardId, dto);
+        Article article = this.articleService.postArticle(userDetails.getUsername(), boardId, dto);
         return ResponseEntity.ok(article);
     }
 

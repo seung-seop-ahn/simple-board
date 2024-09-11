@@ -28,7 +28,7 @@ public class ArticleService {
         this.articleRepository = articleRepository;
     }
 
-    public Article writeArticle(String username, Long boardId, PostArticleDto dto) throws BadRequestException {
+    public Article postArticle(String username, Long boardId, PostArticleDto dto) throws BadRequestException {
         User author = this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
