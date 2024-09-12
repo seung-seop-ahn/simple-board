@@ -84,6 +84,10 @@ public class CommentService {
         Comment comment = this.commentRepository.findById(commentId)
                 .orElseThrow(() -> new BadRequestException("Comment not found"));
 
+        if(comment.getIsDeleted()) {
+            throw new BadRequestException("Comment is deleted.");
+        }
+
         comment.setContents(dto.getContents());
 
         return this.commentRepository.save(comment);
