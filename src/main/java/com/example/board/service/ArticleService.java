@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class ArticleService {
@@ -104,7 +105,7 @@ public class ArticleService {
         Article article = this.articleRepository.findById(articleId)
                 .orElseThrow(() -> new BadRequestException("Article not found"));
 
-        if(!Objects.equals(author.getId(), article.getAuthor().getId())) {
+        if (!Objects.equals(author.getId(), article.getAuthor().getId())) {
             throw new BadRequestException("User is not article author.");
         }
 
@@ -118,8 +119,11 @@ public class ArticleService {
     }
 
     private Boolean isUserArticlePostingAvailable(String username) {
-        Article article = this.articleRepository.findLatestArticleByAuthorUsernameOrderByCreatedDateDesc(username);
-        LocalDateTime articleCreatedDate = article.getCreatedDate();
+        Optional<Article> article = this.articleRepository.findLatestArticleByAuthorUsernameOrderByCreatedDateDesc(username);
+        if (article.isEmpty()) {
+            return true;
+        }
+        LocalDateTime articleCreatedDate = article.get().getCreatedDate();
 
         Duration duration = Duration.between(articleCreatedDate, LocalDateTime.now());
 
@@ -127,8 +131,11 @@ public class ArticleService {
     }
 
     private Boolean isUserArticleEditingAvailable(String username) {
-        Article article = this.articleRepository.findLatestEditedArticleByAuthorUsernameOrderByUpdatedDateDesc(username);
-        LocalDateTime articleCreatedDate = article.getUpdatedDate();
+        Optional<Article> article = this.articleRepository.findLatestEditedArticleByAuthorUsernameOrderByUpdatedDateDesc(username);
+        if (article.isEmpty()) {
+            return true;
+        }
+        LocalDateTime articleCreatedDate = article.get().getUpdatedDate();
 
         Duration duration = Duration.between(articleCreatedDate, LocalDateTime.now());
 
