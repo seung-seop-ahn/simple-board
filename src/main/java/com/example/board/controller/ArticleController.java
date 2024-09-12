@@ -3,6 +3,7 @@ package com.example.board.controller;
 import com.example.board.dto.PostArticleDto;
 import com.example.board.dto.PutArticleDto;
 import com.example.board.entity.Article;
+import com.example.board.service.ArticleCommentService;
 import com.example.board.service.ArticleService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
@@ -14,16 +15,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/boards")
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final ArticleCommentService articleCommentService;
 
     @Autowired
-    public ArticleController(ArticleService articleService) {
+    public ArticleController(ArticleService articleService, ArticleCommentService articleCommentService) {
         this.articleService = articleService;
+        this.articleCommentService = articleCommentService;
     }
 
     @PostMapping("/{boardId}/articles")
@@ -53,6 +58,15 @@ public class ArticleController {
 
         List<Article> list = this.articleService.getTop10ArticleList(boardId);
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/{boardId}/articles/{articleId}")
+    public ResponseEntity<Article> getArticleWithComments(@PathVariable Long boardId, @PathVariable Long articleId) throws BadRequestException, ExecutionException, InterruptedException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        CompletableFuture<Article> article = this.articleCommentService.execute(userDetails.getUsername(), boardId, articleId);
+        return ResponseEntity.ok(article.get());
     }
 
     @PutMapping("/{boardId}/articles/{articleId}")
