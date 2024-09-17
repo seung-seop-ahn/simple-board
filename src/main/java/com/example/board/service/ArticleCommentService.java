@@ -6,6 +6,7 @@ import com.example.board.repository.ArticleRepository;
 import com.example.board.repository.BoardRepository;
 import com.example.board.repository.CommentRepository;
 import com.example.board.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class ArticleCommentService {
     }
 
     @Async
+    @Transactional
     protected CompletableFuture<Article> getArticle(String username, Long boardId, Long articleId) throws BadRequestException {
         this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadRequestException("User not found."));
@@ -62,6 +64,9 @@ public class ArticleCommentService {
         if (article.getIsDeleted()) {
             throw new BadRequestException("Article is deleted.");
         }
+
+        article.setViewCount(article.getViewCount() + 1);
+        this.articleRepository.save(article);
 
         return CompletableFuture.completedFuture(article);
     }
