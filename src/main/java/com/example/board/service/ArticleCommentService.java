@@ -1,11 +1,14 @@
 package com.example.board.service;
 
+import com.example.board.config.elasticsearch.ElasticSearchService;
 import com.example.board.entity.Article;
 import com.example.board.entity.Comment;
 import com.example.board.repository.ArticleRepository;
 import com.example.board.repository.BoardRepository;
 import com.example.board.repository.CommentRepository;
 import com.example.board.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.scheduling.annotation.Async;
@@ -23,14 +26,20 @@ public class ArticleCommentService {
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
 
-    public ArticleCommentService(UserRepository userRepository, BoardRepository boardRepository, ArticleRepository articleRepository, CommentRepository commentRepository) {
+    // ElasticSearch
+    private final ElasticSearchService elasticSearchService;
+    private final ObjectMapper objectMapper;
+
+    public ArticleCommentService(UserRepository userRepository, BoardRepository boardRepository, ArticleRepository articleRepository, CommentRepository commentRepository, ElasticSearchService elasticSearchService, ObjectMapper objectMapper) {
         this.userRepository = userRepository;
         this.boardRepository = boardRepository;
         this.articleRepository = articleRepository;
         this.commentRepository = commentRepository;
+        this.elasticSearchService = elasticSearchService;
+        this.objectMapper = objectMapper;
     }
 
-    public CompletableFuture<Article> execute(String username, Long boardId, Long articleId) throws BadRequestException {
+    public CompletableFuture<Article> execute(String username, Long boardId, Long articleId) throws BadRequestException, JsonProcessingException {
         CompletableFuture<Article> articleFuture = this.getArticle(username, boardId, articleId);
         CompletableFuture<List<Comment>> commentsFuture = this.getComments(articleId);
 
@@ -51,7 +60,7 @@ public class ArticleCommentService {
 
     @Async
     @Transactional
-    protected CompletableFuture<Article> getArticle(String username, Long boardId, Long articleId) throws BadRequestException {
+    protected CompletableFuture<Article> getArticle(String username, Long boardId, Long articleId) throws BadRequestException, JsonProcessingException {
         this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
@@ -66,14 +75,20 @@ public class ArticleCommentService {
         }
 
         article.setViewCount(article.getViewCount() + 1);
-        this.articleRepository.save(article);
+        Article savedArticle = this.articleRepository.save(article);
+        this.indexArticle(savedArticle);
 
-        return CompletableFuture.completedFuture(article);
+        return CompletableFuture.completedFuture(savedArticle);
     }
 
     @Async
     protected CompletableFuture<List<Comment>> getComments(Long articleId) throws BadRequestException {
         List<Comment> comments =  this.commentRepository.findByArticleIdAndIsDeletedFalse(articleId);
         return CompletableFuture.completedFuture(comments);
+    }
+
+    private void indexArticle(Article article) throws JsonProcessingException {
+        String json = this.objectMapper.writeValueAsString(article);
+        this.elasticSearchService.indexDocument("article", article.getId().toString(), json).block();
     }
 }

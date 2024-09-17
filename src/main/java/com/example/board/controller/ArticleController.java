@@ -5,6 +5,7 @@ import com.example.board.dto.PutArticleDto;
 import com.example.board.entity.Article;
 import com.example.board.service.ArticleCommentService;
 import com.example.board.service.ArticleService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ public class ArticleController {
     }
 
     @PostMapping("/{boardId}/articles")
-    public ResponseEntity<Article> postArticle(@PathVariable Long boardId, @Valid @RequestBody PostArticleDto dto) throws BadRequestException {
+    public ResponseEntity<Article> postArticle(@PathVariable Long boardId, @Valid @RequestBody PostArticleDto dto) throws BadRequestException, JsonProcessingException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -61,7 +62,7 @@ public class ArticleController {
     }
 
     @GetMapping("/{boardId}/articles/{articleId}")
-    public ResponseEntity<Article> getArticleWithComments(@PathVariable Long boardId, @PathVariable Long articleId) throws BadRequestException, ExecutionException, InterruptedException {
+    public ResponseEntity<Article> getArticleWithComments(@PathVariable Long boardId, @PathVariable Long articleId) throws BadRequestException, ExecutionException, InterruptedException, JsonProcessingException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -73,7 +74,7 @@ public class ArticleController {
     public ResponseEntity<Article> putArticle(
             @PathVariable Long boardId,
             @PathVariable Long articleId,
-            @Valid @RequestBody PutArticleDto dto) throws BadRequestException {
+            @Valid @RequestBody PutArticleDto dto) throws BadRequestException, JsonProcessingException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -85,7 +86,7 @@ public class ArticleController {
     public ResponseEntity<Void> putArticle(
             @PathVariable Long boardId,
             @PathVariable Long articleId
-    ) throws BadRequestException {
+    ) throws BadRequestException, JsonProcessingException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 

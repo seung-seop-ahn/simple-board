@@ -1,5 +1,6 @@
 package com.example.board.service;
 
+import com.example.board.config.elasticsearch.ElasticSearchService;
 import com.example.board.dto.PostArticleDto;
 import com.example.board.dto.PutArticleDto;
 import com.example.board.entity.Article;
@@ -8,6 +9,8 @@ import com.example.board.entity.User;
 import com.example.board.repository.ArticleRepository;
 import com.example.board.repository.BoardRepository;
 import com.example.board.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,14 +28,20 @@ public class ArticleService {
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
 
+    // ElasticSearch
+    private final ElasticSearchService elasticSearchService;
+    private final ObjectMapper objectMapper;
+
     @Autowired
-    public ArticleService(BoardRepository boardRepository, UserRepository userRepository, ArticleRepository articleRepository) {
+    public ArticleService(BoardRepository boardRepository, UserRepository userRepository, ArticleRepository articleRepository, ElasticSearchService elasticSearchService, ObjectMapper objectMapper) {
         this.boardRepository = boardRepository;
         this.userRepository = userRepository;
         this.articleRepository = articleRepository;
+        this.elasticSearchService = elasticSearchService;
+        this.objectMapper = objectMapper;
     }
 
-    public Article postArticle(String username, Long boardId, PostArticleDto dto) throws BadRequestException {
+    public Article postArticle(String username, Long boardId, PostArticleDto dto) throws BadRequestException, JsonProcessingException {
         Boolean isAvailable = this.isUserArticlePostingAvailable(username);
         if (!isAvailable) {
             throw new BadRequestException("User posting rate limit exceeded.");
@@ -50,7 +59,10 @@ public class ArticleService {
         article.setTitle(dto.getTitle());
         article.setContents(dto.getContents());
 
-        return articleRepository.save(article);
+        Article savedArticle = this.articleRepository.save(article);
+        this.indexArticle(savedArticle);
+
+        return savedArticle;
     }
 
     public List<Article> getTop10ArticleListByFirstId(Long boardId, Long firstId) {
@@ -65,7 +77,7 @@ public class ArticleService {
         return articleRepository.findTop10ByBoardIdOrderByCreatedDateDesc(boardId);
     }
 
-    public Article putArticle(String username, Long boardId, Long articleId, PutArticleDto dto) throws BadRequestException {
+    public Article putArticle(String username, Long boardId, Long articleId, PutArticleDto dto) throws BadRequestException, JsonProcessingException {
         Boolean isAvailable = this.isUserArticleEditingAvailable(username);
         if (!isAvailable) {
             throw new BadRequestException("User editing rate limit exceeded.");
@@ -87,10 +99,13 @@ public class ArticleService {
             article.setContents(dto.getContents());
         }
 
-        return this.articleRepository.save(article);
+        Article savedArticle = this.articleRepository.save(article);
+        this.indexArticle(savedArticle);
+
+        return savedArticle;
     }
 
-    public void deleteArticle(String username, Long boardId, Long articleId) throws BadRequestException {
+    public void deleteArticle(String username, Long boardId, Long articleId) throws BadRequestException, JsonProcessingException {
         Boolean isAvailable = this.isUserArticleEditingAvailable(username);
         if (!isAvailable) {
             throw new BadRequestException("User editing rate limit exceeded.");
@@ -115,7 +130,8 @@ public class ArticleService {
         // Soft Deletion
         article.setIsDeleted(true);
 
-        this.articleRepository.save(article);
+        Article savedArticle = this.articleRepository.save(article);
+        this.indexArticle(savedArticle);
     }
 
     private Boolean isUserArticlePostingAvailable(String username) {
@@ -140,5 +156,10 @@ public class ArticleService {
         Duration duration = Duration.between(articleCreatedDate, LocalDateTime.now());
 
         return duration.toMinutes() >= 1;
+    }
+
+    private void indexArticle(Article article) throws JsonProcessingException {
+        String json = this.objectMapper.writeValueAsString(article);
+        this.elasticSearchService.indexDocument("article", article.getId().toString(), json).block();
     }
 }

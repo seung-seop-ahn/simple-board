@@ -46,7 +46,7 @@ public class Article {
     private Boolean isDeleted = false;
 
     @Column(nullable = false)
-    private Long viewCount;
+    private Long viewCount = 0L;
 
     @CreatedDate
     @Column(insertable = true)
