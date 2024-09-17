@@ -61,6 +61,15 @@ public class ArticleController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/{boardId}/articles/search")
+    public ResponseEntity<List<Article>> searchArticle(
+            @PathVariable Long boardId,
+            @RequestParam(required = true) String keyword
+    ) throws ExecutionException, InterruptedException {
+        List<Article> list = this.articleService.search(boardId, keyword);
+        return ResponseEntity.ok(list);
+    }
+
     @GetMapping("/{boardId}/articles/{articleId}")
     public ResponseEntity<Article> getArticleWithComments(@PathVariable Long boardId, @PathVariable Long articleId) throws BadRequestException, ExecutionException, InterruptedException, JsonProcessingException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

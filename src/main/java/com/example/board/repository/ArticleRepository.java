@@ -27,4 +27,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT a FROM Article a JOIN User u ON a.author.id = u.id AND u.username = :username WHERE a.isDeleted = false ORDER BY a.updatedDate DESC LIMIT 1")
     Optional<Article> findLatestEditedArticleByAuthorUsernameOrderByUpdatedDateDesc(@Param("username") String username);
+
+    @Query("SELECT a FROM Article a JOIN User u ON a.author.id = u.id WHERE a.isDeleted = false AND a.id IN :ids ORDER BY a.updatedDate DESC")
+    List<Article> findAllByIds(@Param("ids") List<Long> ids);
 }

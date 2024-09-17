@@ -14,12 +14,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class ArticleService {
@@ -75,6 +78,11 @@ public class ArticleService {
 
     public List<Article> getTop10ArticleList(Long boardId) {
         return articleRepository.findTop10ByBoardIdOrderByCreatedDateDesc(boardId);
+    }
+
+    public List<Article> search(Long boardId, String keyword) throws ExecutionException, InterruptedException {
+        List<Long> ids = this.elasticSearchService.search("article", keyword);
+        return this.articleRepository.findAllByIds(ids);
     }
 
     public Article putArticle(String username, Long boardId, Long articleId, PutArticleDto dto) throws BadRequestException, JsonProcessingException {
