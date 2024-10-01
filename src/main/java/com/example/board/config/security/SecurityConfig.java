@@ -42,7 +42,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/users/sign-up",
-                                "/api/users/sign-in"
+                                "/api/users/sign-in",
+                                "/api/advertisements",
+                                "/api/advertisements/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

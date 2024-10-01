@@ -2,7 +2,9 @@ package com.example.board.service;
 
 import com.example.board.dto.PostAdvertisementDto;
 import com.example.board.entity.Advertisement;
+import com.example.board.entity.AdvertisementViewHistory;
 import com.example.board.repository.AdvertisementRepository;
+import com.example.board.repository.AdvertisementViewHistoryRepository;
 import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,13 @@ public class AdvertisementService {
     private static final String REDIS_KEY = "Advertisement";
 
     private final AdvertisementRepository advertisementRepository;
+    private final AdvertisementViewHistoryRepository advertisementViewHistoryRepository;
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    public AdvertisementService(AdvertisementRepository advertisementRepository, RedisTemplate<String, Object> redisTemplate) {
+    public AdvertisementService(AdvertisementRepository advertisementRepository, AdvertisementViewHistoryRepository advertisementViewHistoryRepository, RedisTemplate<String, Object> redisTemplate) {
         this.advertisementRepository = advertisementRepository;
+        this.advertisementViewHistoryRepository = advertisementViewHistoryRepository;
         this.redisTemplate = redisTemplate;
     }
 
@@ -45,7 +49,9 @@ public class AdvertisementService {
         return this.advertisementRepository.findAll();
     }
 
-    public Advertisement getAdvertisement(Long id) throws BadRequestException {
+    public Advertisement getAdvertisement(Long id, String username, String ip, Boolean isTrueView) throws BadRequestException {
+        this.insertAdvertisementViewHistory(id, username, ip, isTrueView);
+
         Object cached = this.redisTemplate.opsForHash().get(REDIS_KEY, id);
         if (cached != null) {
             System.out.println("cached");
@@ -55,5 +61,15 @@ public class AdvertisementService {
         System.out.println("not cached");
         return this.advertisementRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("Advertisement not found"));
+    }
+
+    private void insertAdvertisementViewHistory(Long advertisementId, String username, String ip, Boolean isTrueView) {
+        AdvertisementViewHistory advertisementViewHistory = new AdvertisementViewHistory();
+        advertisementViewHistory.setAdvertisementId(advertisementId);
+        advertisementViewHistory.setUsername(username);
+        advertisementViewHistory.setIp(ip);
+        advertisementViewHistory.setIsTrueView(isTrueView != null && isTrueView);
+
+        this.advertisementViewHistoryRepository.save(advertisementViewHistory);
     }
 }
