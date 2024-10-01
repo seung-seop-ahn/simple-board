@@ -59,6 +59,21 @@ public class AdvertisementController {
         return ResponseEntity.ok(advertisement);
     }
 
+    @GetMapping("/{id}/click")
+    public ResponseEntity<Void> clickAdvertisement(HttpServletRequest request, @PathVariable Long id) {
+        String ip = this.getClientIp(request);
+        String username = "";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principle = authentication.getPrincipal();
+        if(!principle.equals("anonymousUser")) {
+            UserDetails userDetails = (UserDetails) principle;
+            username = userDetails.getUsername();
+        }
+
+        this.advertisementService.clickAdvertisement(id, username, ip);
+        return ResponseEntity.noContent().build();
+    }
+
     private String getClientIp(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
