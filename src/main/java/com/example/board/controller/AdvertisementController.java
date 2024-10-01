@@ -1,7 +1,7 @@
 package com.example.board.controller;
 
 import com.example.board.dto.PostAdvertisementDto;
-import com.example.board.entity.Advertisment;
+import com.example.board.entity.Advertisement;
 import com.example.board.service.AdvertisementService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
@@ -23,20 +23,20 @@ public class AdvertisementController {
     }
 
     @PostMapping()
-    public ResponseEntity<Advertisment> postAdvertisement(@Valid @RequestBody PostAdvertisementDto dto) {
-        Advertisment advertisment = this.advertisementService.postAdvertisement(dto);
-        return ResponseEntity.ok(advertisment);
+    public ResponseEntity<Advertisement> postAdvertisement(@Valid @RequestBody PostAdvertisementDto dto) {
+        Advertisement advertisement = this.advertisementService.postAdvertisement(dto);
+        return ResponseEntity.ok(advertisement);
     }
 
     @GetMapping()
-    public ResponseEntity<List<Advertisment>> getAdvertisementList() {
-        List<Advertisment> list = this.advertisementService.getAdvertisementList();
+    public ResponseEntity<List<Advertisement>> getAdvertisementList() {
+        List<Advertisement> list = this.advertisementService.getAdvertisementList();
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Advertisment> getAdvertisement(@PathVariable Long id) throws BadRequestException {
-        Advertisment advertisment = this.advertisementService.getAdvertisement(id);
-        return ResponseEntity.ok(advertisment);
+    public ResponseEntity<Advertisement> getAdvertisement(@PathVariable Long id) throws BadRequestException {
+        Advertisement advertisement = this.advertisementService.getAdvertisement(id);
+        return ResponseEntity.ok(advertisement);
     }
 }
