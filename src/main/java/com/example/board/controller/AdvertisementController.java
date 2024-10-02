@@ -1,5 +1,6 @@
 package com.example.board.controller;
 
+import com.example.board.dto.AdvertisementViewHistoryResult;
 import com.example.board.dto.PostAdvertisementDto;
 import com.example.board.entity.Advertisement;
 import com.example.board.service.AdvertisementService;
@@ -9,7 +10,6 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +50,7 @@ public class AdvertisementController {
         String username = "";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principle = authentication.getPrincipal();
-        if(!principle.equals("anonymousUser")) {
+        if (!principle.equals("anonymousUser")) {
             UserDetails userDetails = (UserDetails) principle;
             username = userDetails.getUsername();
         }
@@ -65,13 +65,19 @@ public class AdvertisementController {
         String username = "";
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principle = authentication.getPrincipal();
-        if(!principle.equals("anonymousUser")) {
+        if (!principle.equals("anonymousUser")) {
             UserDetails userDetails = (UserDetails) principle;
             username = userDetails.getUsername();
         }
 
         this.advertisementService.clickAdvertisement(id, username, ip);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/history/aggregation")
+    public ResponseEntity<List<AdvertisementViewHistoryResult>> getAdvertisementViewHistoryAggregation() {
+        List<AdvertisementViewHistoryResult> list = this.advertisementService.getAdViewHistoryGroupedByAdId();
+        return ResponseEntity.ok(list);
     }
 
     private String getClientIp(HttpServletRequest request) {
