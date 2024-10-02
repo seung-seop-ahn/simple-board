@@ -188,4 +188,6 @@ public class AdvertisementService {
 
         this.advertisementViewHistoryStatRepository.saveAll(stats);
     }
+
+    // todo: advertisement click stats
 }
