@@ -1,5 +1,6 @@
 package com.example.board.entity;
 
+import com.example.board.util.StringListConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,6 +10,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,6 +35,10 @@ public class User {
 
     @Column()
     private LocalDateTime lastLogin;
+
+    @Column(columnDefinition = "json")
+    @Convert(converter = StringListConverter.class)
+    private List<String> deviceList = new ArrayList<>();
 
     @CreatedDate
     @Column(insertable = true)
