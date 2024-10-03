@@ -40,6 +40,7 @@ data
 es_data
 redis_data
 mongo_data
+logstash_data/mysql-connector-j-9.0.0.jar
 
 ### Application Properties ###
 /src/main/resources/application.properties

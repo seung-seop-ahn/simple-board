@@ -69,6 +69,23 @@ services:
     volumes:
       - ./mongo_data:/data/db
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.5.0
+    container_name: logstash
+    restart: no
+    environment:
+      - xpack.monitoring.enabled=false
+      - LOGSTASH_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - ./logstash_data/pipeline:/usr/share/logstash/pipeline
+      - ./logstash_data/mysql-connector-j-9.0.0.jar:/usr/share/logstash/mysql-connector-j-9.0.0.jar
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    depends_on:
+      - mysql
+      - elasticsearch
+
 volumes:
   mysql-data:
   es_data:
