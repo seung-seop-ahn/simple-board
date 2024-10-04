@@ -1,6 +1,6 @@
 package com.example.board.entity;
 
-import com.example.board.util.StringListConverter;
+import com.example.board.util.DeviceListConverter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -37,8 +37,8 @@ public class User {
     private LocalDateTime lastLogin;
 
     @Column(columnDefinition = "json")
-    @Convert(converter = StringListConverter.class)
-    private List<String> deviceList = new ArrayList<>();
+    @Convert(converter = DeviceListConverter.class)
+    private List<Device> deviceList = new ArrayList<>();
 
     @CreatedDate
     @Column(insertable = true)
