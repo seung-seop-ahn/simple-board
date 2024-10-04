@@ -16,11 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -72,7 +70,7 @@ public class ArticleService {
         Notification notification = new ArticleNotification();
         notification.setType("write_article");
         notification.setUserId(author.getId());
-        notification.setArticleId(savedArticle.getId());
+        notification.setContentId(savedArticle.getId());
 
         this.rabbitMQService.send(notification);
 

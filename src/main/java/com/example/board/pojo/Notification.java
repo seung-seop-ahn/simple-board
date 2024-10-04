@@ -7,7 +7,7 @@ import java.io.Serializable;
 public abstract class Notification implements Serializable {
     private String type;
     private Long userId;
-    private Long articleId;
+    private Long contentId;
 
     public String getType() {
         return type;
@@ -25,12 +25,12 @@ public abstract class Notification implements Serializable {
         this.userId = userId;
     }
 
-    public Long getArticleId() {
-        return articleId;
+    public Long getContentId() {
+        return contentId;
     }
 
-    public void setArticleId(Long articleId) {
-        this.articleId = articleId;
+    public void setContentId(Long contentId) {
+        this.contentId = contentId;
     }
 
     public String toJson() {
