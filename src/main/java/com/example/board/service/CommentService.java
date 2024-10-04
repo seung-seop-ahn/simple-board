@@ -38,7 +38,8 @@ public class CommentService {
         this.rabbitMQService = rabbitMQService;
     }
 
-    @Transactional
+    // todo: allow transactional
+//    @Transactional
     public Comment postComment(String username, Long boardId, Long articleId, PostCommentDto dto) throws BadRequestException {
 //        Boolean isAvailable = this.isUserCommentPostingAvailable(username);
 //        if (!isAvailable) {

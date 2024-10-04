@@ -45,7 +45,9 @@ public class RabbitMQService {
     }
 
     public void send(SendCommentNotification notification) {
-        this.rabbitTemplate.convertAndSend("board-notification", notification.toJson());
+        // * rabbitmq exchange (topic)
+        this.rabbitTemplate.convertAndSend("send_notification_exchange", "", notification.toJson());
+//        this.rabbitTemplate.convertAndSend("board-notification", notification.toJson());
     }
 
     @RabbitListener(queues = "board-notification")
@@ -56,10 +58,21 @@ public class RabbitMQService {
         if (message.contains("write_comment_ready")) {
             this.comment(message);
         }
-        if (message.contains("write_comment")) {
-            this.commentHistory(message);
-        }
-        System.out.println(message);
+//        if (message.contains("write_comment")) {
+//            this.commentHistory(message);
+//        }
+
+        System.out.println("board: " + message);
+    }
+
+    @RabbitListener(queues = "send_notification.email")
+    public void receiveEmail(String message) {
+        System.out.println("email: " + message);
+    }
+
+    @RabbitListener(queues = "send_notification.sms")
+    public void receiveSms(String message) {
+        System.out.println("sms: " + message);
     }
 
     private void comment(String message) {
