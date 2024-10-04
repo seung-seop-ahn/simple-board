@@ -107,4 +107,10 @@ public class UserController {
         this.userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/notification/{historyId}")
+    public ResponseEntity<Void> getNotification(@PathVariable String historyId) {
+        this.userService.getNotification(historyId);
+        return ResponseEntity.noContent().build();
+    }
 }

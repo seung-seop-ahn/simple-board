@@ -11,14 +11,17 @@ import java.util.List;
 
 @Service
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final UserNotificationHistoryService userNotificationHistoryService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserNotificationHistoryService userNotificationHistoryService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userNotificationHistoryService = userNotificationHistoryService;
     }
 
     public List<User> getUserList() {
@@ -40,4 +43,7 @@ public class UserService {
         this.userRepository.deleteById(userId);
     }
 
+    public void getNotification(String historyId) {
+        this.userNotificationHistoryService.readNotification(historyId.toString());
+    }
 }
