@@ -6,6 +6,8 @@ import com.example.board.dto.PutArticleDto;
 import com.example.board.entity.Article;
 import com.example.board.entity.Board;
 import com.example.board.entity.User;
+import com.example.board.pojo.ArticleNotification;
+import com.example.board.pojo.Notification;
 import com.example.board.repository.ArticleRepository;
 import com.example.board.repository.BoardRepository;
 import com.example.board.repository.UserRepository;
@@ -30,16 +32,18 @@ public class ArticleService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
+    private final RabbitMQService rabbitMQService;
 
     // ElasticSearch
     private final ElasticSearchService elasticSearchService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public ArticleService(BoardRepository boardRepository, UserRepository userRepository, ArticleRepository articleRepository, ElasticSearchService elasticSearchService, ObjectMapper objectMapper) {
+    public ArticleService(BoardRepository boardRepository, UserRepository userRepository, ArticleRepository articleRepository, RabbitMQService rabbitMQService, ElasticSearchService elasticSearchService, ObjectMapper objectMapper) {
         this.boardRepository = boardRepository;
         this.userRepository = userRepository;
         this.articleRepository = articleRepository;
+        this.rabbitMQService = rabbitMQService;
         this.elasticSearchService = elasticSearchService;
         this.objectMapper = objectMapper;
     }
@@ -64,6 +68,13 @@ public class ArticleService {
 
         Article savedArticle = this.articleRepository.save(article);
         this.indexArticle(savedArticle);
+
+        Notification notification = new ArticleNotification();
+        notification.setType("write_article");
+        notification.setUserId(author.getId());
+        notification.setArticleId(savedArticle.getId());
+
+        this.rabbitMQService.send(notification);
 
         return savedArticle;
     }
