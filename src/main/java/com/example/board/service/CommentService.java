@@ -6,6 +6,8 @@ import com.example.board.entity.Article;
 import com.example.board.entity.Board;
 import com.example.board.entity.Comment;
 import com.example.board.entity.User;
+import com.example.board.pojo.CommentNotification;
+import com.example.board.pojo.Notification;
 import com.example.board.repository.ArticleRepository;
 import com.example.board.repository.BoardRepository;
 import com.example.board.repository.CommentRepository;
@@ -26,20 +28,22 @@ public class CommentService {
     private final BoardRepository boardRepository;
     private final ArticleRepository articleRepository;
     private final CommentRepository commentRepository;
+    private final RabbitMQService rabbitMQService;
 
-    public CommentService(UserRepository userRepository, BoardRepository boardRepository, ArticleRepository articleRepository, CommentRepository commentRepository) {
+    public CommentService(UserRepository userRepository, BoardRepository boardRepository, ArticleRepository articleRepository, CommentRepository commentRepository, RabbitMQService rabbitMQService) {
         this.userRepository = userRepository;
         this.boardRepository = boardRepository;
         this.articleRepository = articleRepository;
         this.commentRepository = commentRepository;
+        this.rabbitMQService = rabbitMQService;
     }
 
     @Transactional
     public Comment postComment(String username, Long boardId, Long articleId, PostCommentDto dto) throws BadRequestException {
-        Boolean isAvailable = this.isUserCommentPostingAvailable(username);
-        if (!isAvailable) {
-            throw new BadRequestException("Comment posting rate limit exceeded.");
-        }
+//        Boolean isAvailable = this.isUserCommentPostingAvailable(username);
+//        if (!isAvailable) {
+//            throw new BadRequestException("Comment posting rate limit exceeded.");
+//        }
         User author = this.userRepository.findByUsername(username)
                 .orElseThrow(() -> new BadRequestException("User not found."));
 
@@ -54,7 +58,16 @@ public class CommentService {
         comment.setAuthor(author);
         comment.setContents(dto.getContents());
 
-        return this.commentRepository.save(comment);
+        Comment savedComment = this.commentRepository.save(comment);
+
+        CommentNotification notification = new CommentNotification();
+        notification.setType("write_comment_ready");
+        notification.setCommentId(savedComment.getId());
+        notification.setUserId(author.getId());
+
+        this.rabbitMQService.send(notification);
+
+        return savedComment;
     }
 
     public List<Comment> getComments(Long boardId, Long articleId) throws BadRequestException {

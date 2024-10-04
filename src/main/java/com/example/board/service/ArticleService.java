@@ -67,10 +67,10 @@ public class ArticleService {
         Article savedArticle = this.articleRepository.save(article);
         this.indexArticle(savedArticle);
 
-        Notification notification = new ArticleNotification();
+        ArticleNotification notification = new ArticleNotification();
         notification.setType("write_article");
         notification.setUserId(author.getId());
-        notification.setContentId(savedArticle.getId());
+        notification.setArticleId(savedArticle.getId());
 
         this.rabbitMQService.send(notification);
 
