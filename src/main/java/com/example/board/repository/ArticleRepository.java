@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.awt.print.Pageable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +30,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("SELECT a FROM Article a JOIN User u ON a.author.id = u.id WHERE a.isDeleted = false AND a.id IN :ids ORDER BY a.updatedDate DESC")
     List<Article> findAllByIds(@Param("ids") List<Long> ids);
+
+    @Query("SELECT a FROM Article a WHERE a.board.id = :boardId AND a.createdDate >= :startDate AND a.createdDate < :endDate AND a.isDeleted = false ORDER BY a.viewCount DESC LIMIT 1")
+    Article findHotArticle(@Param("boardId") Long boardId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }
