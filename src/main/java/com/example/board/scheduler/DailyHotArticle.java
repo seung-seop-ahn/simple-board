@@ -42,6 +42,29 @@ public class DailyHotArticle {
         hotArticle.setUpdatedDate(result.getUpdatedDate());
         hotArticle.setViewCount(result.getViewCount());
 
-        this.redisTemplate.opsForHash().put(REDIS_KEY, hotArticle.getId(), hotArticle);
+        this.redisTemplate.opsForHash().put("Yesterday:" + REDIS_KEY, hotArticle.getId(), hotArticle);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void pickWeeklyHotArticle() {
+        LocalDateTime startDate = LocalDateTime.now().minusDays(8);
+        LocalDateTime endDate = LocalDateTime.now().minusDays(1);
+
+        // todo: boardId
+        Article result = this.articleRepository.findHotArticle(1L, startDate, endDate);
+        if (result == null) {
+            return;
+        }
+
+        HotArticle hotArticle = new HotArticle();
+        hotArticle.setId(result.getId());
+        hotArticle.setTitle(result.getTitle());
+        hotArticle.setContents(result.getContents());
+        hotArticle.setAuthorName(result.getAuthor().getUsername());
+        hotArticle.setCreatedDate(result.getCreatedDate());
+        hotArticle.setUpdatedDate(result.getUpdatedDate());
+        hotArticle.setViewCount(result.getViewCount());
+
+        this.redisTemplate.opsForHash().put("Weekly:" + REDIS_KEY, hotArticle.getId(), hotArticle);
     }
 }
