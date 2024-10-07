@@ -23,6 +23,8 @@ public class Comment {
     @Column(nullable = false)
     private String contents;
 
+    // todo: improve performance by not fetching user
+    // private String username;
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private User author;

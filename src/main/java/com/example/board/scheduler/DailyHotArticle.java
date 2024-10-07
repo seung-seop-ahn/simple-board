@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Component
 public class DailyHotArticle {
-    private static final String REDIS_KEY = "HotArticle";
+    public static final String REDIS_KEY = "HotArticle";
 
     private final ArticleRepository articleRepository;
     private final RedisTemplate<String, Object> redisTemplate;
