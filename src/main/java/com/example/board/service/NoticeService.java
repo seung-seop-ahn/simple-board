@@ -47,6 +47,7 @@ public class NoticeService {
         userNotificationHistory.setTitle("Notice:" + notice.getTitle());
         userNotificationHistory.setContents(notice.getContents());
         userNotificationHistory.setUserId(notice.getAuthor().getId());
+        userNotificationHistory.setNoticeId(notice.getId());
         userNotificationHistory.setIsRead(true);
 
         this.userNotificationHistoryRepository.save(userNotificationHistory);

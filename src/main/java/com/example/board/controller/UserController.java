@@ -5,18 +5,21 @@ import com.example.board.dto.SignInDto;
 import com.example.board.dto.SignUpDto;
 import com.example.board.dto.ValidateTokenDto;
 import com.example.board.entity.User;
+import com.example.board.entity.UserNotificationHistory;
 import com.example.board.service.TokenBlacklistService;
 import com.example.board.service.UserService;
 import com.example.board.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,9 +111,18 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/notification/{historyId}")
-    public ResponseEntity<Void> getNotification(@PathVariable String historyId) {
-        this.userService.getNotification(historyId);
+    @PatchMapping("/notification/{historyId}")
+    public ResponseEntity<Void> patchNotification(@PathVariable String historyId) {
+        this.userService.patchNotification(historyId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/notification")
+    public ResponseEntity<List<UserNotificationHistory>> getNotificationList() throws BadRequestException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        List<UserNotificationHistory> list = this.userService.getNotificationList(userDetails.getUsername());
+        return ResponseEntity.ok(list);
     }
 }

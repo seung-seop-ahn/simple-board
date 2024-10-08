@@ -23,6 +23,8 @@ public class UserNotificationHistory {
 
     private Long userId;
 
+    private Long noticeId;
+
     private Boolean isRead = false;
 
     private LocalDateTime createdDate = LocalDateTime.now();
